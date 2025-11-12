@@ -1,20 +1,15 @@
-# Use a stable Node LTS image
 FROM node:20
 
-# Create app directory
 WORKDIR /srv/app
 
-# Install Strapi v5 (non-interactive)
-RUN npx create-strapi-app@latest . --quickstart --no-run --no-git-init
+# Disable the Strapi interactive login prompt
+ENV STRAPI_DISABLE_REMOTE_PUBLICATIONS=true
+
+# Headless installation (v5)
+RUN npx create-strapi-app@latest . --no-run --no-git-init --use-npm --dbclient=sqlite --dbfile=./data.db
 
 # Build admin panel
 RUN npm run build
 
-# Clean up dev deps
-RUN npm prune --omit=dev
-
-# Expose port
 EXPOSE 1337
-
-# Run Strapi in production mode
 CMD ["npm", "run", "start"]
