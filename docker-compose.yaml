@@ -1,9 +1,0 @@
-
----
-
-## Schritt 3: Lokales Test-Build
-
-```bash
-cd docker-strapi
-docker build -t my-strapi:5.31 .
-docker run -p 1337:1337 my-strapi:5.31
