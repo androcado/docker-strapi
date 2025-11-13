@@ -1,10 +1,10 @@
-name: Build and Publish Strapi Docker Image
+name: 🚀 Build and Publish Strapi Docker Image
 
 on:
   push:
     branches: [ main ]
     tags:
-      - 'v*'     # ← baut automatisch bei git tags wie v5.31.0
+      - 'v*' # build on version tags like v5.31.0
   workflow_dispatch:
 
 env:
@@ -13,46 +13,40 @@ env:
 
 jobs:
   build:
-    name: Build and Push Image
+    name: 🧱 Build and Push Image
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
 
     steps:
-      # Checkout code
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      # Log in to GitHub Container Registry
-      - name: Log in to GitHub Container Registry
+      - name: 🔐 Login to GHCR
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Set up Docker Buildx
-      - name: Set up Docker Buildx
+      - name: 🧰 Setup Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Define image tags dynamically
-      - name: Define image tags
+      - name: 🏷️ Define Tags
         id: vars
         run: |
-          # default tags
-          TAGS="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          TAGS="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          TAGS="$TAGS,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
 
-          # if this is a tagged release, add version tag
           if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
             VERSION_TAG=$(echo "${GITHUB_REF_NAME}" | sed 's/^v//')
-            TAGS="${TAGS},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION_TAG}"
+            TAGS="$TAGS,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION_TAG}"
           fi
 
-          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+          echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
-      # 5️⃣ Build and push Docker image
-      - name: Build and push Docker image
+      - name: 🏗️ Build & Push
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -61,6 +55,5 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # 6️⃣ Output image URLs
-      - name: Image Published
-        run: echo "Published ${{ steps.vars.outputs.tags }}"
+      - name: ✅ Done
+        run: echo "Published: ${{ steps.vars.outputs.tags }}"
