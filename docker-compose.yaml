@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  strapi:
+    image: androcado/strapi5:latest
+    container_name: androcado_prod_strapi
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+
+      # DB settings — GIBST DU IN PORTAINER EIN
+      DATABASE_CLIENT: mysql
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+
+      APP_KEYS: ${APP_KEYS}
+      API_TOKEN_SALT: ${API_TOKEN_SALT}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
+      TRANSFER_TOKEN_SALT: ${TRANSFER_TOKEN_SALT}
+
+    volumes:
+      - strapi_app:/app
+    networks:
+      - proxy
+      - dbnet
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.strapi.rule=Host(\"content.spotlisto.com\")"
+      - "traefik.http.routers.strapi.entrypoints=websecure"
+      - "traefik.http.routers.strapi.tls=true"
+      - "traefik.http.routers.strapi.tls.certresolver=le"
+      - "traefik.http.services.strapi.loadbalancer.server.port=1337"
+
+volumes:
+  strapi_app:
+
+networks:
+  proxy:
+    external: true
+  dbnet:
+    driver: bridge

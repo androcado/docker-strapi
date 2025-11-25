@@ -1,43 +1,31 @@
-name: Build and Push Docker Image
+name: Build Strapi Docker Image
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
-
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: read
-      packages: write
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - name: Log in to GitHub Container Registry
+      - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set SHA short tag
-        id: vars
-        run: echo "sha_short=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
+      - name: Build Docker Image
+        run: |
+          docker build -t ghcr.io/${{ github.repository_owner }}/strapi5:latest .
+          docker build -t ghcr.io/${{ github.repository_owner }}/strapi5:${{ github.sha }} .
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/docker-strapi:latest
-            ghcr.io/${{ github.repository_owner }}/docker-strapi:${{ steps.vars.outputs.sha_short }}
+      - name: Push Docker Image
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/strapi5:latest
+          docker push ghcr.io/${{ github.repository_owner }}/strapi5:${{ github.sha }}

@@ -1,14 +1,21 @@
-FROM node:20
+FROM node:22-alpine
 
-WORKDIR /srv/app
+WORKDIR /app
 
-COPY strapi/package*.json ./
-RUN npm install
+ENV NODE_ENV=development
+ENV CI=true
+ENV STRAPI_DISABLE_WELCOME_MESSAGE=true
+ENV STRAPI_TELEMETRY_DISABLED=true
 
-COPY strapi ./
+# Install npm latest (Strapi requires it)
+RUN npm install -g npm@latest
 
-RUN npm run build
+# Install Strapi project non-interactively
+RUN npm create strapi@latest . -- --quickstart --no-run --skip || true
+
+# Install MySQL connector
+RUN npm install mysql2
 
 EXPOSE 1337
 
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "develop"]
