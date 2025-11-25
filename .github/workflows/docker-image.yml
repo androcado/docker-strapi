@@ -22,10 +22,10 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/strapi5:latest .
-          docker build -t ghcr.io/${{ github.repository_owner }}/strapi5:${{ github.sha }} .
+          docker build -t ghcr.io/${{ github.actor }}/strapi5:latest .
+          docker build -t ghcr.io/${{ github.actor }}/strapi5:${{ github.sha }} .
 
       - name: Push Docker Image
         run: |
-          docker push ghcr.io/${{ github.repository_owner }}/strapi5:latest
-          docker push ghcr.io/${{ github.repository_owner }}/strapi5:${{ github.sha }}
+          docker push ghcr.io/${{ github.actor }}/strapi5:latest
+          docker push ghcr.io/${{ github.actor }}/strapi5:${{ github.sha }}
